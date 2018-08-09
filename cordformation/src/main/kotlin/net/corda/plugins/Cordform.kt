@@ -60,10 +60,10 @@ open class Cordform : Baseform() {
         project.logger.info("Running Cordform task")
         initializeConfiguration()
         nodes.forEach(Node::installConfig)
-        installCordaJar()
+        nodes.forEach { installCordaJar(it.nodeDir) }
         installRunScript()
         nodes.forEach(Node::installDrivers)
-        bootstrapNetwork()
+        nodes.forEach ( Node::installCordapps )
         nodes.forEach(Node::build)
     }
 

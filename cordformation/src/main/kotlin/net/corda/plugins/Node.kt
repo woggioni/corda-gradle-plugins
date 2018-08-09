@@ -260,7 +260,11 @@ open class Node @Inject constructor(private val project: Project) : CordformNode
      */
     private fun installAgentJar() {
         // TODO: improve how we re-use existing declared external variables from root gradle.build
-        val jolokiaVersion = try { project.rootProject.ext<String>("jolokia_version") } catch (e: Exception) { "1.6.0" }
+        val jolokiaVersion = try {
+            project.rootProject.ext<String>("jolokia_version")
+        } catch (e: Exception) {
+            "1.6.0"
+        }
         val agentJar = project.configuration("runtime").files {
             (it.group == "org.jolokia") &&
                     (it.name == "jolokia-jvm") &&
@@ -273,19 +277,29 @@ open class Node @Inject constructor(private val project: Project) : CordformNode
 
     internal fun installDrivers() {
         drivers?.let {
-            project.logger.info("Copy $it to './drivers' directory")
-            it.forEach { path ->  copyToDriversDir(File(path)) }
+            it.forEach { path ->
+                println("Copy ${File(path).absolutePath} to ${File(nodeDir.absoluteFile, "drivers")} directory")
+                copyToDriversDir(File(path))
+            }
+        }
+    }
+
+    internal fun installCordapps() {
+        getCordappList()?.let {
+            val cordAppsDir = File(nodeDir, "cordapps")
+            it.forEach { cordapp ->
+                cordapp.jarFile.toFile().absoluteFile.copyTo(File(cordAppsDir.absoluteFile, cordapp.jarFile.toFile().name))
+            }
         }
     }
 
     private fun copyToDriversDir(file: File) {
         if (file.isFile) {
-            val driversDir = File(nodeDir, "drivers")
-            project.copy {
-                it.apply {
-                    from(file)
-                    into(driversDir)
-                }
+            val driversDir = File(nodeDir.absoluteFile, "drivers")
+            val driversFile = File(driversDir, file.name)
+            file.copyTo(driversFile, overwrite = true)
+            if (!driversFile.exists()) {
+                println("expected: $driversFile but is missing - copy has failed")
             }
         }
     }
@@ -362,8 +376,12 @@ open class Node @Inject constructor(private val project: Project) : CordformNode
 
     private fun Config.toNodeOnly(): Config {
         var cfg = this
-        cfg = if (hasPath("webAddress")) { cfg.withoutPath("webAddress").withoutPath("useHTTPS") } else cfg
-        cfg = if (!hasPath("devMode")) { cfg.withValue("devMode", ConfigValueFactory.fromAnyRef(true)) } else cfg
+        cfg = if (hasPath("webAddress")) {
+            cfg.withoutPath("webAddress").withoutPath("useHTTPS")
+        } else cfg
+        cfg = if (!hasPath("devMode")) {
+            cfg.withValue("devMode", ConfigValueFactory.fromAnyRef(true))
+        } else cfg
         return cfg
     }
 

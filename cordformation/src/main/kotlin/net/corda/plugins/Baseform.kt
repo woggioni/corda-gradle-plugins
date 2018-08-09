@@ -99,12 +99,12 @@ open class Baseform : DefaultTask() {
     /**
      * Installs the corda fat JAR to the root directory, for the network bootstrapper to use.
      */
-    protected fun installCordaJar() {
+    protected fun installCordaJar(nodeDir: File? = null) {
         val cordaJar = Cordformation.verifyAndGetRuntimeJar(project, "corda")
         project.copy {
             it.apply {
                 from(cordaJar)
-                into(directory)
+                into(nodeDir?.absoluteFile ?: directory)
                 rename(cordaJar.name, nodeJarName)
                 fileMode = Cordformation.executableFileMode
             }
@@ -188,13 +188,12 @@ open class Baseform : DefaultTask() {
      * Note that this classloader's parent is the system classloader.
      */
     class CordformClassLoader(
-        urls: Array<URL>,
-        private val logger: Logger,
-        cordform: Class<*> = CordformDefinition::class.java // parameterised for testing
-)   : URLClassLoader(urls) {
+            urls: Array<URL>,
+            private val logger: Logger,
+            cordform: Class<*> = CordformDefinition::class.java // parameterised for testing
+    ) : URLClassLoader(urls) {
         private val pluginClassloader: ClassLoader = cordform.classLoader
-        private val prefixes: List<String>
-                      = listOf(cordform.`package`.name + '.', "com.typesafe.config.", "org.jetbrains.kotlin.")
+        private val prefixes: List<String> = listOf(cordform.`package`.name + '.', "com.typesafe.config.", "org.jetbrains.kotlin.")
 
         override fun loadClass(name: String, resolve: Boolean): Class<*> {
             synchronized(getClassLoadingLock(name)) {
