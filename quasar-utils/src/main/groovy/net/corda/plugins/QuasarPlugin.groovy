@@ -63,7 +63,7 @@ class QuasarPlugin implements Plugin<Project> {
             it.transitive = false
         }
 
-        // Add Quasar to the runmtime classpath WITHOUT any of its transitive dependencies.
+        // Add Quasar to the runtime classpath WITHOUT any of its transitive dependencies.
         Utils.createRuntimeConfiguration("cordaRuntime", project.configurations)
         project.dependencies.add("cordaRuntime", quasar) {
             // Ensure that Quasar's transitive dependencies are available at runtime (only).
