@@ -9,11 +9,10 @@ description 'Deletes or stubs out unwanted elements from Java/Kotlin byte-code.'
 repositories {
     mavenCentral()
     jcenter()
-    maven { url "https://kotlin.bintray.com/kotlinx/" }
 }
 
 ext {
-    kotlin_metadata_version = '0.0.4'
+    kotlin_metadata_version = '0.0.5'
 }
 
 gradlePlugin {
@@ -58,7 +57,6 @@ dependencies {
     testImplementation "org.assertj:assertj-core:$assertj_version"
     testImplementation "junit:junit:$junit_version"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junit_jupiter_version"
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junit_platform_version"
     testImplementation project(':jar-filter:unwanteds')
 
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
